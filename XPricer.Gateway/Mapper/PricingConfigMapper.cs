@@ -6,6 +6,15 @@ using XPricer.Gateway.Model;
 
 namespace XPricer.Gateway.Mapper
 {
+    public static class ComputeRequestMapper
+    {
+        public static XPricer.Model.ComputeRequest ToInternal(ComputeRequest request)
+        {
+            return new XPricer.Model.ComputeRequest(
+                PricingConfigMapper.ToInternal(request.Config),
+                ProductMapper.ToInternal(request.Product));
+        }
+    }
     public static class PricingConfigMapper
     {
         public static XPricer.Model.PricingConfig ToInternal(PricingConfig config)

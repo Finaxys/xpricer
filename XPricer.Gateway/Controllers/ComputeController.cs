@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using XPricer.Gateway.Mapper;
@@ -15,12 +16,8 @@ namespace XPricer.Gateway.Controllers
         public RequestId Post([FromBody] dynamic data)
         {
             var requests = ((JArray) data).ToObject<IEnumerable<ComputeRequest>>();
-            foreach (var request in requests)
-            {
-                var product = ProductMapper.ToInternal(request.Product);
-                var config = PricingConfigMapper.ToInternal(request.Config);
 
-            }
+            var internalRequests = requests.Select(ComputeRequestMapper.ToInternal);
             var requestId = new RequestId(Guid.NewGuid().ToString());
 
             return requestId;

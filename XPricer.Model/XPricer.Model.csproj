@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComputeRequest.cs" />
     <Compile Include="MarketData\EquityQuote.cs" />
     <Compile Include="MarketData\MarketData.cs" />
     <Compile Include="MarketData\StockKey.cs" />
