@@ -1,8 +1,8 @@
 ﻿namespace XPricer.Model.MarketData
 {
-    public abstract class MarketData
+    public abstract class MarketData<TKey>
     {
-        public MarketDataId Id { get; set; }
-
+        public TKey   Key  { get; set; }
+        public string Type { get; set; }
     }
 }

@@ -2,16 +2,16 @@
 
 namespace XPricer.Model.MarketData
 {
-    public class EquityQuote : MarketData
+    public class EquityQuote : MarketData<StockKey>
     {
-        public EquityQuoteId Id { get; }
-        public DateTime Date { get; }
-        public decimal Price { get; }
+        public DateTime Date  { get; }
+        public decimal  Price { get; }
 
-        public EquityQuote(EquityQuoteId id, DateTime date, decimal price)
+        public EquityQuote(StockKey key, DateTime date, decimal price)
         {
-            Id = id;
-            Date = date;
+            Type  = "Equity Quote";
+            Key   = key;
+            Date  = date;
             Price = price;
         }
 

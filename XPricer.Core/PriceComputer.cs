@@ -23,7 +23,7 @@ namespace XPricer.Core
             Product = product;
         }
 
-        public void AddMarketData(IEnumerable<MarketData> marketDatas)
+        public void AddMarketData<TKeys>(IEnumerable<MarketData<TKeys>> marketDatas)
         {
 
         }
