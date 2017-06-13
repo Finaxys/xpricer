@@ -64,7 +64,7 @@ namespace XPricer.Scheduler
                     VanillaOption Vanilla = cr.Product as VanillaOption;
                     if (Vanilla != null) {
                         String requestBlobFile = UploadRequestToBlob(cr, Vanilla.Underlying, cloudStorageAccount, this.settings.BlobContainer);
-                        CloudTask task = new CloudTask("xpricer_task_" + Vanilla.Underlying , String.Format("{0} {1} {2}",
+                        CloudTask task = new CloudTask("xpricer_task_" + Vanilla.Underlying , String.Format("{0} {1}",
                         "cmd /c %AZ_BATCH_APP_PACKAGE_XPRICER%\\xpricer.exe -args",    
                         requestBlobFile,
                         containerSasUrl));

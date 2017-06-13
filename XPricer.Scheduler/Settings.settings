@@ -24,10 +24,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ApplicationPackageName" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">xpricer</Value>
     </Setting>
     <Setting Name="ApplicationPackageVersion" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">1</Value>
     </Setting>
   </Settings>
 </SettingsFile>
