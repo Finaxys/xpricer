@@ -87,7 +87,7 @@ namespace XPricer.TaskRunner
         private static void CalculateVanillaOption(VanillaOption option, PricingConfig config, List<EquityQuote> quote, List<EquityVolatility> volatility)
         { 
             var priceComputerFactory = new PriceComputerFactory();
-            var priceComputer = priceComputerFactory.Create(config, option);
+            var priceComputer = (PriceComputer)priceComputerFactory.Create(config, option);
 
             priceComputer.EquityQuotes = quote;
             priceComputer.EquityVolatilities = volatility;
