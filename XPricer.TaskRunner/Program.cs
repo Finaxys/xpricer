@@ -88,7 +88,9 @@ namespace XPricer.TaskRunner
         { 
             var priceComputerFactory = new PriceComputerFactory();
             var priceComputer = priceComputerFactory.Create(config, option);
-            //TODO use quote and volatility
+
+            priceComputer.EquityQuotes = quote;
+            priceComputer.EquityVolatilities = volatility;
             var result = priceComputer.Compute();
         }
 
