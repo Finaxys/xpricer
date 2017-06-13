@@ -1,0 +1,103 @@
+<!--The whole content below can be removed with the new code.-->
+<div class="container">
+  <div class="page-header">
+    <h1>
+      Vanilla Option Pricer
+    </h1>
+  </div>
+
+<div class="col-xs-6">
+  <form class="form">
+    <div class="form-group">
+      <label for="underlying">Underlying</label>
+      <input type="text" class="form-control" id="underlying" placeholder="Underlying">
+    </div>
+
+    <div class="form-group">
+      <label for="strike">Strike</label>
+      <div class="input-group">
+        <div class="input-group-addon">€</div>
+        <input type="text" class="form-control" id="strike" placeholder="Strike">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="maturity">Maturity</label>
+      <input type="date" class="form-control" id="maturity" placeholder="Maturity">
+    </div>
+
+    <div class="radio">
+      <label>
+    <input type="radio" name="optionType" id="call" value="call" checked>
+    Call
+  </label>
+      <label>
+    <input type="radio" name="optionType" id="put" value="put">
+    Put
+  </label>
+    </div>
+
+    <div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Pricing Config</h3>
+  </div>
+
+  <div class="panel-body">
+    <div class="form-group">
+      <label for="pricingDate">Pricing Date</label>
+      <input type="date" class="form-control" id="pricingDate" placeholder="Pricing Date">
+    </div>
+    <div class="form-group">
+      <label for="numberOfPaths">Number of Simultion Paths</label>
+      <input type="text" class="form-control" id="numberOfPaths" placeholder="Number of paths">
+    </div>
+  </div>
+</div>
+    <button type="submit" class="btn btn-default">Add</button>
+  </form>
+</div>
+<div class="col-xs-6">
+    <div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Portfolio</h3>
+  </div>
+  <div class="panel-body" style="min-height: 465px">
+    <table class="table">
+      <tr>
+        <th>Underlying</th>
+        <th>Strike</th>
+        <th>Maturity</th>
+        <th>Type</th>
+        <th>Pricing Date</th>
+        <th>Nb. Simulation Paths</th>
+      </tr>
+      <tr>
+        <td>MSFT</td>
+        <td>70.43</td>
+        <td>03/12/2018</td>
+        <td>Call</td>
+        <td>06/13/2017</td>
+        <td>1000</td>
+      </tr>
+      <tr>
+        <td>MSFT</td>
+        <td>70.43</td>
+        <td>03/12/2018</td>
+        <td>Call</td>
+        <td>06/13/2017</td>
+        <td>1000</td>
+      </tr>
+      <tr>
+        <td>MSFT</td>
+        <td>70.43</td>
+        <td>03/12/2018</td>
+        <td>Call</td>
+        <td>06/13/2017</td>
+        <td>1000</td>
+      </tr>
+    </table>
+  </div>
+</div>
+    <button type="submit" class="btn btn-primary">Compute</button>
+
+</div>
