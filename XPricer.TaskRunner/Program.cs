@@ -43,15 +43,14 @@ namespace XPricer.TaskRunner
                 loggerConfigurator.Configure();
                 logger.Info("Starting the Task Runner");
 
-                if (args.Length != 3)
+                if (args.Length != 2)
                 {
                     logger.Error("invalid number of arguments");
                     return (int)ExitCode.InvalidArgument;
                 }
 
                 var requestBlobFile = args[0];
-                var containerName = args[1];
-                var containerSasURL = args[2];
+                var containerSasURL = args[1];
                 var computeRequest = ExtractComputeRequest(requestBlobFile, containerName, containerSasURL);
                 var vanilla = computeRequest.Product as VanillaOption;
                 var config = computeRequest.Config;
@@ -61,8 +60,8 @@ namespace XPricer.TaskRunner
                 var quotesBlobName = String.Format("{0}{1}", underlying, QUOTES).ToUpper();
                 var volatilitiesBlobName= String.Format("{0}{1}", underlying, VOLATILITIES).ToUpper();
 
-                List<EquityQuote> quoteList = FakeMarketData.DeserializeQuotes(readBlobText(quotesBlobName, containerName, containerSasURL));
-                List<EquityVolatility> volatilityList = FakeMarketData.DeserializeVolatilities(readBlobText(volatilitiesBlobName, containerName, containerSasURL));
+                List<EquityQuote> quoteList = FakeMarketData.DeserializeQuotes(readBlobText(quotesBlobName, containerSasURL));
+                List<EquityVolatility> volatilityList = FakeMarketData.DeserializeVolatilities(readBlobText(volatilitiesBlobName, containerSasURL));
             }
             catch (Exception e)
             {
@@ -78,7 +77,7 @@ namespace XPricer.TaskRunner
 
         private static ComputeRequest ExtractComputeRequest(String requestBlob, String containerName, String sasUri)
         {
-            String blobText = readBlobText(requestBlob, containerName, sasUri);
+            String blobText = readBlobText(requestBlob, sasUri);
             ComputeRequest crResult = JsonConvert.DeserializeObject<ComputeRequest>(blobText);
 
             return crResult;
@@ -87,18 +86,16 @@ namespace XPricer.TaskRunner
         private static void CalculateVanillaOption(VanillaOption option, PricingConfig config, List<EquityQuote> quote, List<EquityVolatility> volatility)
         { 
             var priceComputerFactory = new PriceComputerFactory();
-            var priceComputer = priceComputerFactory.Create(config, option);
+            var priceComputer = (PriceComputer)priceComputerFactory.Create(config, option);
 
             priceComputer.EquityQuotes = quote;
             priceComputer.EquityVolatilities = volatility;
             var result = priceComputer.Compute();
         }
 
-        private static string readBlobText(String requestBlob, String containerName, String sasUri)
+        private static string readBlobText(String requestBlob, String sasUri)
         {
-            CloudBlobClient client = new CloudBlobClient(new Uri(sasUri));
-
-            CloudBlobContainer container = client.GetContainerReference(containerName);
+            CloudBlobContainer container = new CloudBlobContainer(new Uri(sasUri));
 
             CloudBlockBlob blob = container.GetBlockBlobReference(requestBlob);
 
