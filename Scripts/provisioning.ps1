@@ -3,12 +3,12 @@
 param
     (
           [Parameter(Mandatory=$false)]  [String]$Purge ="no", 
-          [Parameter(Mandatory=$false)]  [String]$AzureRmResourceGroup = "xpricerresourcegroup2",
-          [Parameter(Mandatory=$false)]  [String]$AzureRmStorageAccount = "xpricerstorageaccount2",
-          [Parameter(Mandatory=$false)]  [String]$AzureRmBatchAccount = "xpricerbatchaccount2",
-          [Parameter(mandatory=$false)]  [String]$AzureStorageContainer = "xpricerstorage-container2",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmResourceGroup = "xpricerresourcegroup",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmStorageAccount = "xpricerstorageaccount",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmBatchAccount = "xpricerbatchaccount",
+          [Parameter(mandatory=$false)]  [String]$AzureStorageContainer = "xpricerstorage-container",
           [Parameter(mandatory=$false)]  [int]$NbrVM ="4",
-          [Parameter(mandatory=$false)]  [String]$PoolName="xpricerpool2",
+          [Parameter(mandatory=$false)]  [String]$PoolName="xpricerpool",
           [Parameter(mandatory=$false)]  [String]$template_json_file="c:\template.json",
           [Parameter(mandatory=$false)]  [String]$FakeMarketData="C:\Azure\FakeMarketData",
           [Parameter(mandatory=$false)]  [String]$settings_file="c:\Settings.settings"
@@ -114,7 +114,14 @@ $settings = @"
     <Setting Name="$AzureStorageContainer" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-  </Settings>
+
+	<Setting Name="ApplicationPackageName" Type="System.String" Scope="User">
+	<Value Profile="(Default)">xpricer</value>
+	</Setting>
+	<Setting Name="ApplicationPackageVersion" Type="System.String" Scope="User">
+	<Value Profile="(Default)">1</value>
+	</Setting>
+ 
 </SettingsFile>
 "@
 
