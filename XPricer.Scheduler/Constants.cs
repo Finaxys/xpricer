@@ -10,7 +10,6 @@ namespace XPricer.Scheduler
     {
 
         public const String XPricerPool = "XPricerPool";
-        public const String XPricerJob = "XPricerJob";
 
         public const String XPricerExe = "xpricer.exe";
         public const String EquityQuote = "EquityQuote_";

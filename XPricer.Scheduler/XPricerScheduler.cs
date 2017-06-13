@@ -56,7 +56,8 @@ namespace XPricer.Scheduler
 
             using (BatchClient batchClient = await BatchClient.OpenAsync(credentials))
             {
-                CloudJob xpricerJob = CreateJob(batchClient, Constants.XPricerJob, Constants.XPricerPool);
+                CloudJob xpricerJob = CreateJob(batchClient, requestId.Id, Constants.XPricerPool);
+
                 List<CloudTask> tasksToRun = new List<CloudTask>();
                 foreach (ComputeRequest cr in requests)
                 {
@@ -81,7 +82,7 @@ namespace XPricer.Scheduler
                 }
 
                 //Add tasks to the Job
-                batchClient.JobOperations.AddTask(Constants.XPricerJob, tasksToRun);
+                batchClient.JobOperations.AddTask(requestId.Id, tasksToRun);
             }
 
             return requestId;
