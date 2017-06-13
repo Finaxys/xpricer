@@ -6,11 +6,16 @@ using XPricer.Model;
 using XPricer.Model.MarketData;
 using XPricer.Model.Product;
 using VanillaOption = XPricer.Model.Product.VanillaOption;
+using System.Linq;
 
 namespace XPricer.Core
 {
     internal class PriceComputer : IPriceComputer
     {
+        // Market Data
+        public List<EquityQuote>      EquityQuotes       = new List<EquityQuote>();
+        public List<EquityVolatility> EquityVolatilities = new List<EquityVolatility>();
+
         // ReSharper disable once InconsistentNaming
         private static readonly Logger logger = LogManager.GetCurrentClassLogger(typeof(PriceComputer));
 
@@ -19,13 +24,8 @@ namespace XPricer.Core
 
         public PriceComputer(PricingConfig config, Product product)
         {
-            Config = config;
+            Config  = config;
             Product = product;
-        }
-
-        public void AddMarketData<TKeys>(IEnumerable<MarketData<TKeys>> marketDatas)
-        {
-
         }
 
         public PricingResult Compute()
@@ -38,7 +38,7 @@ namespace XPricer.Core
 
             var calendar = new TARGET();
             Settings.setEvaluationDate(Config.PricingDate);
-
+            
             Option.Type type;
             switch (vanillaOption.OptionType)
             {
@@ -52,11 +52,19 @@ namespace XPricer.Core
                     throw new ArgumentOutOfRangeException($"The vanilla option type {vanillaOption.OptionType} is not supported!");
             }
 
-            var underlying = 70.32;
+            var underlying = EquityQuotes.First(q => q.Key.Id == vanillaOption.Underlying
+                                                  && q.Date.Year == Config.PricingDate.Year
+                                                  && q.Date.Month == Config.PricingDate.Month
+                                                  && q.Date.Day == Config.PricingDate.Day)
+                                         .Price;
             var strike = vanillaOption.Strike;
             var dividendYield = 0.00;
             var riskFreeRate = 0.06;
-            var volatility = 0.20;
+            var volatility = EquityVolatilities.First(v => v.Key.Id == vanillaOption.Underlying
+                                                        && v.Date.Year == Config.PricingDate.Year
+                                                        && v.Date.Month == Config.PricingDate.Month
+                                                        && v.Date.Day == Config.PricingDate.Day)
+                                               .Volatility;
             Date maturity = vanillaOption.Maturity;
             DayCounter dayCounter = new Actual365Fixed();
 
@@ -70,15 +78,14 @@ namespace XPricer.Core
 
             Exercise europeanExercise = new EuropeanExercise(maturity);
 
-
-            var underlyingH = new Handle<Quote>(new SimpleQuote(underlying));
+            var underlyingH = new Handle<Quote>(new SimpleQuote(Convert.ToDouble(underlying)));
 
             // bootstrap the yield/dividend/vol curves
             var flatTermStructure = new Handle<YieldTermStructure>(new FlatForward(Config.PricingDate, riskFreeRate, dayCounter));
             // ReSharper disable once InconsistentNaming
             var flatDividendTS = new Handle<YieldTermStructure>(new FlatForward(Config.PricingDate, dividendYield, dayCounter));
             // ReSharper disable once InconsistentNaming
-            var flatVolTS = new Handle<BlackVolTermStructure>(new BlackConstantVol(Config.PricingDate, calendar, volatility, dayCounter));
+            var flatVolTS = new Handle<BlackVolTermStructure>(new BlackConstantVol(Config.PricingDate, calendar, Convert.ToDouble(volatility), dayCounter));
             StrikedTypePayoff payoff = new PlainVanillaPayoff(type, strike);
             var bsmProcess = new BlackScholesMertonProcess(underlyingH, flatDividendTS, flatTermStructure, flatVolTS);
 
