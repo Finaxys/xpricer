@@ -1,19 +1,21 @@
 #.\xPricer.ps1 -Purge no -AzureRmResourceGroup xpricerresourcegroup -AzureRmStorageAccount xpricerstorageaccount -AzureRmBatchAccount xpricerbatchaccount -AzureStorageContainer xpricerstoragecontainer -NbrVM 4 -PoolName xpricerpool
-
 param
     (
           [Parameter(Mandatory=$false)]  [String]$Purge ="no", 
-          [Parameter(Mandatory=$false)]  [String]$AzureRmResourceGroup = "xpricerresourcegroup",
-          [Parameter(Mandatory=$false)]  [String]$AzureRmStorageAccount = "xpricerstorageaccount",
-          [Parameter(Mandatory=$false)]  [String]$AzureRmBatchAccount = "xpricerbatchaccount",
-          [Parameter(mandatory=$false)]  [String]$AzureStorageContainer = "xpricerstorage-container",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmResourceGroup = "finaxys-poc-batch",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmStorageAccount = "azurestorageaccount",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmBatchAccount = "azurebatchaccount",
+          [Parameter(mandatory=$false)]  [String]$AzureStorageContainer = "azurestoragecontainer",
           [Parameter(mandatory=$false)]  [int]$NbrVM ="4",
-          [Parameter(mandatory=$false)]  [String]$PoolName="xpricerpool",
+          [Parameter(mandatory=$false)]  [String]$PoolName="finaxyspoolname",
           [Parameter(mandatory=$false)]  [String]$template_json_file="c:\template.json",
           [Parameter(mandatory=$false)]  [String]$FakeMarketData="C:\Azure\FakeMarketData",
           [Parameter(mandatory=$false)]  [String]$settings_file="c:\Settings.settings"
 
       )
+
+Set-StrictMode -version 3
+$ErrorActionPreference = "Stop"
 
 # Get-Module PowerShellGet -list | Select-Object Name,Version,Path
 # Install-Module AzureRM -Force
@@ -32,10 +34,13 @@ if (($Purge -eq "yes") -or ($Purge -eq "YES") -or ($Purge -eq "Yes")) {
 New-AzureRmResourceGroup –Name "$AzureRmResourceGroup" –Location “West Europe” 
 
 # create storage account
-New-AzureRmStorageAccount –ResourceGroup "$AzureRmResourceGroup" –StorageAccountName "$AzureRmStorageAccount" –Location "West Europe" –Type "Standard_LRS" 
+New-AzureRmStorageAccount –ResourceGroup "$AzureRmResourceGroup" –StorageAccountName "$AzureRmStorageAccount" –Location "West Europe" –Type "Standard_LRS"
+
+$AzureRmStorageAccountID = Get-AzureRmStorageAccount –ResourceGroup "$AzureRmResourceGroup" –StorageAccountName "$AzureRmStorageAccount" 
 
 # create batch service
-New-AzureRmBatchAccount –AccountName "$AzureRmBatchAccount" –Location "West Europe" –ResourceGroupName "$AzureRmResourceGroup"
+New-AzureRmBatchAccount –AccountName "$AzureRmBatchAccount" –Location "West Europe" –ResourceGroupName "$AzureRmResourceGroup" -AutoStorageAccountId $AzureRmStorageAccountID.Id
+
 
 # keys taken from the new batch account created
 $Account = Get-AzureRmBatchAccountKeys –AccountName "$AzureRmBatchAccount"
