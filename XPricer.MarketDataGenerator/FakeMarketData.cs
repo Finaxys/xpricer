@@ -107,7 +107,7 @@ namespace XPricer.MarketDataGenerator
             return sb.ToString();
         }
 
-        private static List<EquityQuote> DeserializeQuotes(string text)
+        public static List<EquityQuote> DeserializeQuotes(string text)
         {
             StockKey key = null;
             var equityQuotes = new List<EquityQuote>();
@@ -125,7 +125,7 @@ namespace XPricer.MarketDataGenerator
             return equityQuotes;
         }
 
-        private static List<EquityVolatility> DeserializeVolatilities(string text)
+        public static List<EquityVolatility> DeserializeVolatilities(string text)
         {
             StockKey key = null;
             var equityVolatilities = new List<EquityVolatility>();
