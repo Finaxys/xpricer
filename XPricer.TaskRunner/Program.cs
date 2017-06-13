@@ -51,17 +51,26 @@ namespace XPricer.TaskRunner
 
                 var requestBlobFile = args[0];
                 var containerSasURL = args[1];
+                logger.Info("Start - Reading compute request");
                 var computeRequest = ExtractComputeRequest(requestBlobFile, containerSasURL);
-                var vanilla = computeRequest.Product as VanillaOption;
+                logger.Info("Finished - Reading compute request");
+                var product = computeRequest.Product as VanillaOption;
+                if (product == null)
+                {
+                    throw new NotSupportedException("The product should be a vanilla option!");
+                }
                 var config = computeRequest.Config;
 
-                var underlying = vanilla.Underlying;
+                var underlying = product.Underlying;
 
                 var quotesBlobName = String.Format("{0}{1}", underlying, QUOTES).ToUpper();
                 var volatilitiesBlobName= String.Format("{0}{1}", underlying, VOLATILITIES).ToUpper();
 
                 List<EquityQuote> quoteList = FakeMarketData.DeserializeQuotes(readBlobText(quotesBlobName, containerSasURL));
                 List<EquityVolatility> volatilityList = FakeMarketData.DeserializeVolatilities(readBlobText(volatilitiesBlobName, containerSasURL));
+
+                CalculateVanillaOption(product, config, quoteList, volatilityList);
+
             }
             catch (Exception e)
             {
@@ -78,7 +87,8 @@ namespace XPricer.TaskRunner
         private static ComputeRequest ExtractComputeRequest(String requestBlob, String sasUri)
         {
             String blobText = readBlobText(requestBlob, sasUri);
-            ComputeRequest crResult = JsonConvert.DeserializeObject<ComputeRequest>(blobText);
+
+            ComputeRequest crResult = JsonConvert.DeserializeObject<ComputeRequest>(blobText, new ProductConverter());
 
             return crResult;
         }
