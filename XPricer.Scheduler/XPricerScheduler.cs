@@ -14,6 +14,7 @@ using NLog;
 using XPricer.Model;
 using XPricer.Model.Product;
 
+
 namespace XPricer.Scheduler
 {
 
@@ -87,7 +88,10 @@ namespace XPricer.Scheduler
             }
 
             return requestId;
+            
         }
+
+
 
         private string UploadRequestToBlob(ComputeRequest cr, String filename, CloudStorageAccount storageAccount, String containerName)
         {
