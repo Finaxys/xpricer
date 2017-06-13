@@ -2,7 +2,7 @@
 
 param
     (
-          [Parameter(Mandatory=$false)]  [String]$Purge ="yes", 
+          [Parameter(Mandatory=$false)]  [String]$Purge ="no", 
           [Parameter(Mandatory=$false)]  [String]$AzureRmResourceGroup = "xpricerresourcegroup",
           [Parameter(Mandatory=$false)]  [String]$AzureRmStorageAccount = "xpricerstorageaccount",
           [Parameter(Mandatory=$false)]  [String]$AzureRmBatchAccount = "xpricerbatchaccount",
@@ -55,9 +55,10 @@ $context = Get-AzureRmBatchAccountKeys -AccountName "$AzureRmBatchAccount"
 $configuration = New-Object -TypeName "Microsoft.Azure.Commands.Batch.Models.PSCloudServiceConfiguration" -ArgumentList @(4,"*")
 New-AzureBatchPool -Id "$PoolName" -VirtualMachineSize "Small" -CloudServiceConfiguration $configuration -AutoScaleFormula '$TargetDedicated=4;' -BatchContext $context
 
-$AzureStorageContainerContext = New-AzureStorageContext -StorageAccountName "$AzureRmStorageAccount" -StorageAccountKey $ReturnsxPricerKeys[1] 
-$AzureStorageContainerContext
+#$AzureStorageContainerContext = New-AzureStorageContext -StorageAccountName "$AzureRmStorageAccount" -StorageAccountKey $ReturnsxPricerKeys[1] 
 
+$AzureStorageContainerContext = New-AzureStorageContext -ConnectionString "DefaultEndpointsProtocol=https;AccountName=$AzureRmStorageAccount;AccountKey=$Key;"
+$AzureStorageContainerContext
 
 New-AzureStorageContainer -Name $AzureStorageContainer -Context $AzureStorageContainerContext
 Write-Host "Pool $PoolName has been created ..."
@@ -92,25 +93,25 @@ $settings = @"
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="XPricer.Scheduler" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="`$BatchURL" Type="System.String" Scope="User">
+    <Setting Name="$BatchURL" Type="System.String" Scope="User">
       <Value Profile="(Default)">https://(YourAccount).(region).batch.azure.com</Value>
     </Setting>
-    <Setting Name="`$AzureRmBatchAccount" Type="System.String" Scope="User">
+    <Setting Name="$AzureRmBatchAccount" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="`$Key" Type="System.String" Scope="User">
+    <Setting Name="$Key" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="StorageServiceUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)">core.windows.net</Value>
     </Setting>
-    <Setting Name="`$AzureRmStorageAccount" Type="System.String" Scope="User">
+    <Setting Name="$AzureRmStorageAccount" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="StorageAccountKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="`$AzureStorageContainer" Type="System.String" Scope="User">
+    <Setting Name="$AzureStorageContainer" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>
