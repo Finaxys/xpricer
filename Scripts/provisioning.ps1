@@ -91,7 +91,7 @@ ConvertTo-Json $jobj | Out-File $template_json_file
 
 # write all these information to a json file
 $settings = @"
-{
+
 <?xml version='1.0' encoding='utf-8'?>
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="XPricer.Scheduler" GeneratedClassName="Settings">
   <Profiles />
