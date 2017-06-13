@@ -10,7 +10,7 @@ namespace XPricer.MarketDataGenerator
     {
         // public
 
-        public static void CreateEquityQuotes()
+        public static void CreateEquityMarketData()
         {
             var eq = GenerateEquityQuotes("MSF", new DateTime(2016, 06, 13), DateTime.Now, 44, 65, 44, 0.12M); // Microsoft
             File.WriteAllText("MSF-QUOTES.csv", Serialize(eq));

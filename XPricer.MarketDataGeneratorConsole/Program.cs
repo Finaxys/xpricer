@@ -12,7 +12,7 @@ namespace XPricer.MarketDataGeneratorConsole
         static void Main(string[] args)
         {
             Console.Error.WriteLine("Starting data Generation...");
-            FakeMarketData.CreateEquityQuotes();
+            FakeMarketData.CreateEquityMarketData();
             Console.Error.WriteLine("Data Generation Complete.");
         }
     }
