@@ -29,5 +29,8 @@
     <Setting Name="ApplicationPackageVersion" Type="System.String" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
+    <Setting Name="PoolID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">xpricerpool2</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

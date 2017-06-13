@@ -130,5 +130,17 @@ namespace XPricer.Scheduler {
                 this["ApplicationPackageVersion"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("xpricerpool2")]
+        public string PoolID {
+            get {
+                return ((string)(this["PoolID"]));
+            }
+            set {
+                this["PoolID"] = value;
+            }
+        }
     }
 }
