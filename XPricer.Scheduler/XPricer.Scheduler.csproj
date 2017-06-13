@@ -57,6 +57,9 @@
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.10\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Spatial, Version=5.8.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -89,10 +92,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\XPricer.Gateway\XPricer.Gateway.csproj">
-      <Project>{62FD5465-BFAC-4032-92DD-82FFDE298312}</Project>
-      <Name>XPricer.Gateway</Name>
-    </ProjectReference>
     <ProjectReference Include="..\XPricer.Model\XPricer.Model.csproj">
       <Project>{5BEA9E13-6FA1-4B3E-9C1E-1D14C1707C45}</Project>
       <Name>XPricer.Model</Name>

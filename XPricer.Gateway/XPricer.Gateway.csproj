@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XPricer.Model\XPricer.Model.csproj" />
+    <ProjectReference Include="..\XPricer.Scheduler\XPricer.Scheduler.csproj" />
   </ItemGroup>
 
 </Project>

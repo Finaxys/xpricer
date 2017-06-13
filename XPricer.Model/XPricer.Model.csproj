@@ -52,6 +52,7 @@
     <Compile Include="Product\Product.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Product\VanillaOption.cs" />
+    <Compile Include="RequestId.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

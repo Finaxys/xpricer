@@ -15,6 +15,15 @@ namespace XPricer.Gateway.Mapper
                 ProductMapper.ToInternal(request.Product));
         }
     }
+
+    public static class RequestIdMapper
+    {
+        public static RequestId ToExternal(XPricer.Model.RequestId request)
+        {
+            return new RequestId(request.Id);
+        }
+    }
+
     public static class PricingConfigMapper
     {
         public static XPricer.Model.PricingConfig ToInternal(PricingConfig config)

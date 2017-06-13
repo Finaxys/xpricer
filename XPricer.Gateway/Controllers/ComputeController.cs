@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using XPricer.Gateway.Mapper;
 using XPricer.Gateway.Model;
+using XPricer.Scheduler;
 
 namespace XPricer.Gateway.Controllers
 {
@@ -13,14 +14,14 @@ namespace XPricer.Gateway.Controllers
     {
         // POST api/values
         [HttpPost]
-        public RequestId Post([FromBody] dynamic data)
+        public async Task<RequestId> Post([FromBody] dynamic data)
         {
             var requests = ((JArray) data).ToObject<IEnumerable<ComputeRequest>>();
 
             var internalRequests = requests.Select(ComputeRequestMapper.ToInternal);
-            var requestId = new RequestId(Guid.NewGuid().ToString());
-
-            return requestId;
+            var scheduler = new XPricerScheduler();
+            var requestId = await scheduler.RunAsync(internalRequests);
+            return RequestIdMapper.ToExternal(requestId);
         }
     }
 }

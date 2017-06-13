@@ -10,14 +10,18 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 using XPricer.Model;
-using XPricer.Model.MarketData;
 using XPricer.Model.Product;
 
 namespace XPricer.Scheduler
 {
-    class XPricerScheduler
+
+    public class XPricerScheduler 
     {
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger(typeof(XPricerScheduler));
+
         private readonly Settings settings;
 
         public XPricerScheduler()
@@ -25,10 +29,12 @@ namespace XPricer.Scheduler
             this.settings = Settings.Default;
         }
 
-        public async Task RunAsync(IEnumerable<ComputeRequest> request)
+        public async Task<RequestId> RunAsync(IEnumerable<ComputeRequest> requests)
         {
-            Console.WriteLine("Running with the following settings: ");
-            Console.WriteLine("----------------------------------------");
+
+            var requestId = new RequestId(Guid.NewGuid().ToString());
+
+            logger.Info("Running with the following settings: ");
 
             CloudStorageAccount cloudStorageAccount = new CloudStorageAccount(
                new StorageCredentials(
@@ -52,7 +58,7 @@ namespace XPricer.Scheduler
             {
                 CloudJob xpricerJob = CreateJob(batchClient, Constants.XPricerJob, Constants.XPricerPool);
                 List<CloudTask> tasksToRun = new List<CloudTask>();
-                foreach (ComputeRequest cr in request)
+                foreach (ComputeRequest cr in requests)
                 {
                     VanillaOption Vanilla = cr.Product as VanillaOption;
                     if (Vanilla != null) {
@@ -77,6 +83,8 @@ namespace XPricer.Scheduler
                 //Add tasks to the Job
                 batchClient.JobOperations.AddTask(Constants.XPricerJob, tasksToRun);
             }
+
+            return requestId;
         }
 
         private string UploadRequestToBlob(ComputeRequest cr, String filename, CloudStorageAccount storageAccount, String containerName)
