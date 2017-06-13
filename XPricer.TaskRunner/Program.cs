@@ -51,7 +51,7 @@ namespace XPricer.TaskRunner
 
                 var requestBlobFile = args[0];
                 var containerSasURL = args[1];
-                var computeRequest = ExtractComputeRequest(requestBlobFile, containerName, containerSasURL);
+                var computeRequest = ExtractComputeRequest(requestBlobFile, containerSasURL);
                 var vanilla = computeRequest.Product as VanillaOption;
                 var config = computeRequest.Config;
 
@@ -75,7 +75,7 @@ namespace XPricer.TaskRunner
             return (int) ExitCode.Success;
         }
 
-        private static ComputeRequest ExtractComputeRequest(String requestBlob, String containerName, String sasUri)
+        private static ComputeRequest ExtractComputeRequest(String requestBlob, String sasUri)
         {
             String blobText = readBlobText(requestBlob, sasUri);
             ComputeRequest crResult = JsonConvert.DeserializeObject<ComputeRequest>(blobText);

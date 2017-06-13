@@ -14,6 +14,7 @@ using NLog;
 using XPricer.Model;
 using XPricer.Model.Product;
 
+
 namespace XPricer.Scheduler
 {
 
@@ -56,8 +57,7 @@ namespace XPricer.Scheduler
 
             using (BatchClient batchClient = await BatchClient.OpenAsync(credentials))
             {
-                CloudJob xpricerJob = CreateJob(batchClient, requestId.Id, Constants.XPricerPool);
-                xpricerJob.PoolInformation = new PoolInformation() { PoolId = settings.PoolID };
+                CloudJob xpricerJob = CreateJob(batchClient, requestId.Id, settings.PoolID);
 
                 List<CloudTask> tasksToRun = new List<CloudTask>();
                 foreach (ComputeRequest cr in requests)
@@ -65,9 +65,9 @@ namespace XPricer.Scheduler
                     VanillaOption Vanilla = cr.Product as VanillaOption;
                     if (Vanilla != null) {
                         String requestBlobFile = UploadRequestToBlob(cr, Vanilla.Underlying, cloudStorageAccount, this.settings.BlobContainer);
-                        CloudTask task = new CloudTask("xpricer_task_" + Vanilla.Underlying , String.Format("{0} {1}",
-                        "cmd /c %AZ_BATCH_APP_PACKAGE_XPRICER%\\xpricer.exe -args",    
-                        requestBlobFile,
+                        CloudTask task = new CloudTask("xpricer_task_" + Vanilla.Underlying , String.Format("{0} {1} {2}",
+                        "cmd /c %AZ_BATCH_APP_PACKAGE_XPRICER%\\xpricer.exe -args",
+                        Vanilla.Underlying,
                         containerSasUrl));
 
                     task.ApplicationPackageReferences = new List<ApplicationPackageReference>
@@ -87,7 +87,10 @@ namespace XPricer.Scheduler
             }
 
             return requestId;
+            
         }
+
+
 
         private string UploadRequestToBlob(ComputeRequest cr, String filename, CloudStorageAccount storageAccount, String containerName)
         {
