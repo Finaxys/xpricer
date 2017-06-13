@@ -90,6 +90,10 @@
       <Project>{51406E69-F017-4447-9F0D-F41B2C31B6B3}</Project>
       <Name>XPricer.Framework</Name>
     </ProjectReference>
+    <ProjectReference Include="..\XPricer.MarketDataGenerator\XPricer.MarketDataGenerator.csproj">
+      <Project>{71A34D73-D297-490C-A640-C9CAF4A424D1}</Project>
+      <Name>XPricer.MarketDataGenerator</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XPricer.Model\XPricer.Model.csproj">
       <Project>{5BEA9E13-6FA1-4B3E-9C1E-1D14C1707C45}</Project>
       <Name>XPricer.Model</Name>
