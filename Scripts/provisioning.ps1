@@ -117,7 +117,5 @@ $settings = @"
 </SettingsFile>
 "@
 
-$xobj = ConvertTo-Xml -InputObject $settings
-
-ConvertTo-Xml $xobj | Out-File $settings_file
+$settings | Out-File $settings_file
 (Get-Content -path "$settings_file" -Encoding Unicode) | Set-Content -Encoding "Default" -Path "$settings_file" 
