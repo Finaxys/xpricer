@@ -73,8 +73,8 @@ namespace XPricer.Scheduler
                     {
                         new ApplicationPackageReference
                         {
-                            ApplicationId = "xpricer",
-                            Version = "1"
+                            ApplicationId = settings.ApplicationPackageName,
+                            Version = settings.ApplicationPackageVersion 
                         }
                     };
                     tasksToRun.Add(task);
