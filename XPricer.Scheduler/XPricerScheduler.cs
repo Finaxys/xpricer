@@ -3,27 +3,29 @@ using Microsoft.Azure.Batch.Auth;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using XPricer.Model;
 using XPricer.Model.MarketData;
+using XPricer.Model.Product;
 
 namespace XPricer.Scheduler
 {
     class XPricerScheduler
     {
-        private static readonly IList<String> stockList = new List<String>() { "MSFT", "GOOG", "FB" };
-
-    private readonly Settings settings;
+        private readonly Settings settings;
 
         public XPricerScheduler()
         {
             this.settings = Settings.Default;
         }
 
-        public async Task RunAsync()
+        public async Task RunAsync(IEnumerable<ComputeRequest> request)
         {
             Console.WriteLine("Running with the following settings: ");
             Console.WriteLine("----------------------------------------");
@@ -38,7 +40,7 @@ namespace XPricer.Scheduler
             //Generate a SAS for the container.
             string containerSasUrl = ConstructContainerSas(
                 cloudStorageAccount,
-                this.settings.BlobContainer);
+                this.settings.BlobContainer, true);
 
             //Set up the Batch Service credentials used to authenticate with the Batch Service.
             BatchSharedKeyCredentials credentials = new BatchSharedKeyCredentials(
@@ -50,12 +52,14 @@ namespace XPricer.Scheduler
             {
                 CloudJob xpricerJob = CreateJob(batchClient, Constants.XPricerJob, Constants.XPricerPool);
                 List<CloudTask> tasksToRun = new List<CloudTask>();
-                foreach (String index in stockList)
+                foreach (ComputeRequest cr in request)
                 {
-                    CloudTask task = new CloudTask("xpricer_task_" + index, String.Format("{0} {1} {2} {3}",
+                    VanillaOption Vanilla = cr.Product as VanillaOption;
+                    if (Vanilla != null) {
+                        String requestBlobFile = UploadRequestToBlob(cr, Vanilla.Underlying, cloudStorageAccount, this.settings.BlobContainer);
+                        CloudTask task = new CloudTask("xpricer_task_" + Vanilla.Underlying , String.Format("{0} {1} {2}",
                         "cmd /c %AZ_BATCH_APP_PACKAGE_XPRICER%\\xpricer.exe -args",    
-                        String.Format("{0}_{1}", Constants.EquityQuote, index),
-                        String.Format("{0}_{1}", Constants.Key, index),
+                        requestBlobFile,
                         containerSasUrl));
 
                     task.ApplicationPackageReferences = new List<ApplicationPackageReference>
@@ -67,11 +71,34 @@ namespace XPricer.Scheduler
                         }
                     };
                     tasksToRun.Add(task);
+                    }
                 }
 
                 //Add tasks to the Job
                 batchClient.JobOperations.AddTask(Constants.XPricerJob, tasksToRun);
             }
+        }
+
+        private string UploadRequestToBlob(ComputeRequest cr, String filename, CloudStorageAccount storageAccount, String containerName)
+        {
+            CloudBlobClient client = storageAccount.CreateCloudBlobClient();
+
+            CloudBlobContainer container = client.GetContainerReference(containerName);
+
+            CloudBlockBlob blob = container.GetBlockBlobReference(filename);
+            blob.DeleteIfExists();
+
+            var options = new BlobRequestOptions()
+            {
+                ServerTimeout = TimeSpan.FromMinutes(10)
+            };
+
+            var crJson = JsonConvert.SerializeObject(cr);
+            using (var stream = new MemoryStream(Encoding.Default.GetBytes(crJson), false))
+            {
+                blob.UploadFromStream(stream, null, options);
+            }
+            return blob.Uri.AbsoluteUri;
         }
 
         private CloudJob CreateJob(BatchClient client, String id, String poolId) {
@@ -89,7 +116,7 @@ namespace XPricer.Scheduler
 
         private string ConstructContainerSas(
             CloudStorageAccount cloudStorageAccount,
-            string containerName)
+            string containerName, bool tokenOnly)
         {
             //Lowercase the container name because containers must always be all lower case
             containerName = containerName.ToLower();
@@ -109,6 +136,10 @@ namespace XPricer.Scheduler
             };
 
             string sasString = container.GetSharedAccessSignature(sasPolicy);
+            if (tokenOnly)
+            {
+                return sasString;
+            }
             return String.Format("{0}{1}", container.Uri, sasString); ;
         }
 

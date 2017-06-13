@@ -84,11 +84,15 @@
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\XPricer.Gateway\XPricer.Gateway.csproj">
+      <Project>{62FD5465-BFAC-4032-92DD-82FFDE298312}</Project>
+      <Name>XPricer.Gateway</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XPricer.Model\XPricer.Model.csproj">
       <Project>{5BEA9E13-6FA1-4B3E-9C1E-1D14C1707C45}</Project>
       <Name>XPricer.Model</Name>
