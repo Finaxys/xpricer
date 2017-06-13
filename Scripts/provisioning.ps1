@@ -44,7 +44,6 @@ $SecondaryAccountKey = $Account.SecondaryAccountKey
 
 $BatchAccountKey = $PrimaryAccountKey
 
-
 $AccountStorage = Get-AzureRmStorageAccountKey –AccountName "$AzureRmStorageAccount" -ResourceGroupName "$AzureRmResourceGroup"
 $AccountStorageKey = $AccountStorage.Value[0]
 
@@ -115,12 +114,16 @@ $settings = @"
       <Value Profile="(Default)" />
     </Setting>
 
-	<Setting Name="ApplicationPackageName" Type="System.String" Scope="User">
-	<Value Profile="(Default)">xpricer</value>
-	</Setting>
-	<Setting Name="ApplicationPackageVersion" Type="System.String" Scope="User">
-	<Value Profile="(Default)">1</value>
-	</Setting>
+     <Setting Name="$PoolName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+
+    <Setting Name="ApplicationPackageName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ApplicationPackageVersion" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+       </Setting>
  
 </SettingsFile>
 "@
