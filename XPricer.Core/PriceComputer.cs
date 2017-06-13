@@ -10,7 +10,7 @@ using VanillaOption = XPricer.Model.Product.VanillaOption;
 
 namespace XPricer.Core
 {
-    internal class PriceComputer : IPriceComputer
+    public class PriceComputer : IPriceComputer
     {
         // Config
         public PricingConfig Config  { get; }

@@ -6,7 +6,7 @@ param
           [Parameter(Mandatory=$false)]  [String]$AzureRmResourceGroup = "xpricerresourcegroup",
           [Parameter(Mandatory=$false)]  [String]$AzureRmStorageAccount = "xpricerstorageaccount",
           [Parameter(Mandatory=$false)]  [String]$AzureRmBatchAccount = "xpricerbatchaccount",
-          [Parameter(mandatory=$false)]  [String]$AzureStorageContainer = "xpricerstoragecontainer",
+          [Parameter(mandatory=$false)]  [String]$AzureStorageContainer = "xpricerstorage-container",
           [Parameter(mandatory=$false)]  [int]$NbrVM ="4",
           [Parameter(mandatory=$false)]  [String]$PoolName="xpricerpool",
           [Parameter(mandatory=$false)]  [String]$template_json_file="c:\template.json",
@@ -41,10 +41,11 @@ New-AzureRmBatchAccount –AccountName "$AzureRmBatchAccount" –Location "West 
 $Account = Get-AzureRmBatchAccountKeys –AccountName "$AzureRmBatchAccount"
 $PrimaryAccountKey = $Account.PrimaryAccountKey
 $SecondaryAccountKey = $Account.SecondaryAccountKey 
-$global:ReturnsxPricerKeys.Add("$PrimaryAccountKey")
-$global:ReturnsxPricerKeys.Add("$SecondaryAccountKey")
 
-$Key = $ReturnsxPricerKeys[1]
+$BatchAccountKey = $PrimaryAccountKey
+
+$AccountStorage = Get-AzureRmStorageAccountKey –AccountName "$AzureRmStorageAccount" -ResourceGroupName "$AzureRmResourceGroup"
+$AccountStorageKey = $AccountStorage.Value[0]
 
 # variable for the service batch address URL
 $ServiceBatchURL = Get-AzureRmBatchAccount –AccountName "$AzureRmBatchAccount"
@@ -54,17 +55,15 @@ $BatchURL = $ServiceBatchURL.TaskTenantUrl
 $context = Get-AzureRmBatchAccountKeys -AccountName "$AzureRmBatchAccount"
 $configuration = New-Object -TypeName "Microsoft.Azure.Commands.Batch.Models.PSCloudServiceConfiguration" -ArgumentList @(4,"*")
 New-AzureBatchPool -Id "$PoolName" -VirtualMachineSize "Small" -CloudServiceConfiguration $configuration -AutoScaleFormula '$TargetDedicated=4;' -BatchContext $context
+Write-Host "Pool $PoolName has been created ..."
 
-#$AzureStorageContainerContext = New-AzureStorageContext -StorageAccountName "$AzureRmStorageAccount" -StorageAccountKey $ReturnsxPricerKeys[1] 
-
-$AzureStorageContainerContext = New-AzureStorageContext -ConnectionString "DefaultEndpointsProtocol=https;AccountName=$AzureRmStorageAccount;AccountKey=$Key;"
+$AzureStorageContainerContext = New-AzureStorageContext -ConnectionString "DefaultEndpointsProtocol=https;AccountName=$AzureRmStorageAccount;AccountKey=$AccountStorageKey;"
 $AzureStorageContainerContext
 
 New-AzureStorageContainer -Name $AzureStorageContainer -Context $AzureStorageContainerContext
-Write-Host "Pool $PoolName has been created ..."
 
 # Upload FakeMarketData files 
-ls $FakeMarketData | Set-AzureStorageBlobContent –Container $AzureStorageContainer –ConcurrentTaskCount 16
+ls $FakeMarketData | Set-AzureStorageBlobContent –Container $AzureStorageContainer -Context $AzureStorageContainerContext –ConcurrentTaskCount 16
 
 # write all these information to a json file
 $json = @"
@@ -76,7 +75,7 @@ $json = @"
 $jobj = ConvertFrom-Json -InputObject $json    
     
 $jobj | add-member "AzureRmStorageAccount" "$AzureRmStorageAccount" -MemberType NoteProperty
-$jobj | add-member "PrivateKey" "$Key" -MemberType NoteProperty
+$jobj | add-member "PrivateKey" "$BatchAccountKey" -MemberType NoteProperty
 $jobj | add-member "AzureRmBatchAccount" "$AzureRmBatchAccount" -MemberType NoteProperty
 $jobj | add-member "ServiceBatchURL" "$BatchURL" -MemberType NoteProperty
 $jobj | add-member "PoolName" "$PoolName" -MemberType NoteProperty
@@ -99,7 +98,7 @@ $settings = @"
     <Setting Name="$AzureRmBatchAccount" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="$Key" Type="System.String" Scope="User">
+    <Setting Name="$BatchAccountKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="StorageServiceUrl" Type="System.String" Scope="User">
@@ -108,13 +107,24 @@ $settings = @"
     <Setting Name="$AzureRmStorageAccount" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="StorageAccountKey" Type="System.String" Scope="User">
+    <Setting Name="$AccountStorageKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="$AzureStorageContainer" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-  </Settings>
+
+     <Setting Name="$PoolName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+
+    <Setting Name="ApplicationPackageName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ApplicationPackageVersion" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+       </Setting>
+ 
 </SettingsFile>
 "@
 
