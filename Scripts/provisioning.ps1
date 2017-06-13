@@ -1,19 +1,25 @@
 #.\xPricer.ps1 -Purge no -AzureRmResourceGroup xpricerresourcegroup -AzureRmStorageAccount xpricerstorageaccount -AzureRmBatchAccount xpricerbatchaccount -AzureStorageContainer xpricerstoragecontainer -NbrVM 4 -PoolName xpricerpool
-
 param
     (
           [Parameter(Mandatory=$false)]  [String]$Purge ="no", 
-          [Parameter(Mandatory=$false)]  [String]$AzureRmResourceGroup = "xpricerresourcegroup",
-          [Parameter(Mandatory=$false)]  [String]$AzureRmStorageAccount = "xpricerstorageaccount",
-          [Parameter(Mandatory=$false)]  [String]$AzureRmBatchAccount = "xpricerbatchaccount",
-          [Parameter(mandatory=$false)]  [String]$AzureStorageContainer = "xpricerstorage-container",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmResourceGroup = "finaxyspocbatchrg2",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmStorageAccount = "finaxyspocbatchsa2",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmBatchAccount = "finaxyspocbatchba2",
+          [Parameter(mandatory=$false)]  [String]$AzureStorageContainer = "finaxyspocbatchco2",
           [Parameter(mandatory=$false)]  [int]$NbrVM ="4",
-          [Parameter(mandatory=$false)]  [String]$PoolName="xpricerpool",
+          [Parameter(mandatory=$false)]  [String]$PoolName="finaxyspocbatchpo2",
           [Parameter(mandatory=$false)]  [String]$template_json_file="c:\template.json",
+          [Parameter(Mandatory=$false)]  [String]$Upload ="yes",
           [Parameter(mandatory=$false)]  [String]$FakeMarketData="C:\Azure\FakeMarketData",
-          [Parameter(mandatory=$false)]  [String]$settings_file="c:\Settings.settings"
+          [Parameter(mandatory=$false)]  [String]$settings_file="c:\Settings.settings",
+
+          [Parameter(Mandatory=$false)]  [String]$AzureRmAppServicePlan = "finaxyspocbatchserviceplan",
+          [Parameter(Mandatory=$false)]  [String]$AzureRmWebApp = "finaxyspocbatchwebapp"
 
       )
+
+Set-StrictMode -version 3
+$ErrorActionPreference = "Stop"
 
 # Get-Module PowerShellGet -list | Select-Object Name,Version,Path
 # Install-Module AzureRM -Force
@@ -29,13 +35,16 @@ if (($Purge -eq "yes") -or ($Purge -eq "YES") -or ($Purge -eq "Yes")) {
 }     
 
 # create a resource Group
-New-AzureRmResourceGroup –Name "$AzureRmResourceGroup" –Location “West Europe” 
+New-AzureRmResourceGroup –Name "$AzureRmResourceGroup" –Location "West Europe" 
 
 # create storage account
-New-AzureRmStorageAccount –ResourceGroup "$AzureRmResourceGroup" –StorageAccountName "$AzureRmStorageAccount" –Location "West Europe" –Type "Standard_LRS" 
+New-AzureRmStorageAccount –ResourceGroup "$AzureRmResourceGroup" –StorageAccountName "$AzureRmStorageAccount" –Location "West Europe" –Type "Standard_LRS"
+
+$AzureRmStorageAccountID = Get-AzureRmStorageAccount –ResourceGroup "$AzureRmResourceGroup" –StorageAccountName "$AzureRmStorageAccount" 
 
 # create batch service
-New-AzureRmBatchAccount –AccountName "$AzureRmBatchAccount" –Location "West Europe" –ResourceGroupName "$AzureRmResourceGroup"
+New-AzureRmBatchAccount –AccountName "$AzureRmBatchAccount" –Location "West Europe" –ResourceGroupName "$AzureRmResourceGroup" -AutoStorageAccountId $AzureRmStorageAccountID.Id
+
 
 # keys taken from the new batch account created
 $Account = Get-AzureRmBatchAccountKeys –AccountName "$AzureRmBatchAccount"
@@ -63,7 +72,9 @@ $AzureStorageContainerContext
 New-AzureStorageContainer -Name $AzureStorageContainer -Context $AzureStorageContainerContext
 
 # Upload FakeMarketData files 
-ls $FakeMarketData | Set-AzureStorageBlobContent –Container $AzureStorageContainer -Context $AzureStorageContainerContext –ConcurrentTaskCount 16
+if (($Upload -eq "yes") -or ($Upload -eq "YES") -or ($Upload -eq "Yes")) {    
+    ls $FakeMarketData | Set-AzureStorageBlobContent –Container $AzureStorageContainer -Context $AzureStorageContainerContext –ConcurrentTaskCount 16       
+} 
 
 # write all these information to a json file
 $json = @"
@@ -85,48 +96,53 @@ ConvertTo-Json $jobj | Out-File $template_json_file
 (Get-Content -path "$template_json_file" -Encoding Unicode) | Set-Content -Encoding "Default" -Path "$template_json_file"
 
 # write all these information to a json file
-
 $settings = @"
-{
 <?xml version='1.0' encoding='utf-8'?>
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="XPricer.Scheduler" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="$BatchURL" Type="System.String" Scope="User">
-      <Value Profile="(Default)">https://(YourAccount).(region).batch.azure.com</Value>
+    <Setting Name="BatchServiceUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">$BatchURL</Value>
     </Setting>
-    <Setting Name="$AzureRmBatchAccount" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="BatchAccountName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">$AzureRmBatchAccount</Value>
     </Setting>
-    <Setting Name="$BatchAccountKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="BatchAccountKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">$BatchAccountKey</Value>
     </Setting>
     <Setting Name="StorageServiceUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)">core.windows.net</Value>
     </Setting>
-    <Setting Name="$AzureRmStorageAccount" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="StorageAccountName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">$AzureRmStorageAccount</Value>
     </Setting>
-    <Setting Name="$AccountStorageKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="StorageAccountKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">$AccountStorageKey</Value>
     </Setting>
-    <Setting Name="$AzureStorageContainer" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="BlobContainer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">$AzureStorageContainer</Value>
     </Setting>
-
-     <Setting Name="$PoolName" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-
     <Setting Name="ApplicationPackageName" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">xpricer</Value>
     </Setting>
     <Setting Name="ApplicationPackageVersion" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-       </Setting>
- 
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="PoolID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">$PoolName</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
 "@
 
 $settings | Out-File $settings_file
 (Get-Content -path "$settings_file" -Encoding Unicode) | Set-Content -Encoding "Default" -Path "$settings_file" 
+
+Get-AzureRmWebApp -ResourceGroupname $AzureRmResourceGroup
+
+New-AzureRmAppServicePlan -Name $AzureRmAppServicePlan -Location "West Europe" -ResourceGroupName $AzureRmResourceGroup -Tier Basic -WorkerSize Small -NumberofWorkers 2
+New-AzureRmWebApp -Name $AzureRmWebApp -AppServicePlan $AzureRmAppServicePlan -ResourceGroupName $AzureRmResourceGroup -Location "West Europe"
+Get-AzureRmWebAppPublishingProfile -ResourceGroupName $AzureRmResourceGroup -Name $AzureRmWebApp -OutputFile "C:\$AzureRmWebApp.PublishSettings"
+
+
+

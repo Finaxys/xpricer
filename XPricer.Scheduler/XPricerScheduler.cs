@@ -47,7 +47,7 @@ namespace XPricer.Scheduler
             //Generate a SAS for the container.
             string containerSasUrl = ConstructContainerSas(
                 cloudStorageAccount,
-                this.settings.BlobContainer, true);
+                this.settings.BlobContainer, false);
 
             //Set up the Batch Service credentials used to authenticate with the Batch Service.
             BatchSharedKeyCredentials credentials = new BatchSharedKeyCredentials(
@@ -65,8 +65,8 @@ namespace XPricer.Scheduler
                     VanillaOption Vanilla = cr.Product as VanillaOption;
                     if (Vanilla != null) {
                         String requestBlobFile = UploadRequestToBlob(cr, Vanilla.Underlying, cloudStorageAccount, this.settings.BlobContainer);
-                        CloudTask task = new CloudTask("xpricer_task_" + Vanilla.Underlying , String.Format("{0} {1} {2}",
-                        "cmd /c %AZ_BATCH_APP_PACKAGE_XPRICER%\\xpricer.exe -args",
+                        CloudTask task = new CloudTask("xpricer_task_" + Vanilla.Underlying , String.Format("{0} {1} \"{2}\"",
+                        string.Format("cmd /c %AZ_BATCH_APP_PACKAGE_{0}#{1}%\\XPricer.TaskRunner.exe -args", settings.ApplicationPackageName.ToUpper(), settings.ApplicationPackageVersion),
                         Vanilla.Underlying,
                         containerSasUrl));
 
